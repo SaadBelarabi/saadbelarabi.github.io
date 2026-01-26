@@ -67,7 +67,6 @@ This is an easy one if we look back at our findings in Q1. The `.remove.sh` scri
 
 **Answer:** `444`
 
-<br>
 
 ---
 
@@ -182,7 +181,18 @@ We can easily determine the URL used from the previous image.
 
 ### Q8: What is the name of the file that the attacker downloaded to execute the malicious script and subsequently remove itself?
 
-I don't really see a logical way to find what we are looking for. In CyberDefenders official write-up it's mentioned that you can help yourself by reducing the noise, mainly by removing logs with client IPs that are related to benign services like google or Microsoft.
+After further research, it doesn’t seem like the malicious script was downloaded from the same IP as the previous question.
+I used the following expression to filter the logs:
+
+```cat error_log | grep -E "curl|wget" | grep "http"```
+
+And after a bit of digging I noticed some suspicious logs with what seemed to be base64 encoding. Decoding them confirmed the suspicions
+
+![img](/images/image011-1.png)
+
+Without going into the details, the script does indeed remove itself at the end with the rm –rf command.
+
+**Answer:** `.install`
 
 <br>
 
@@ -192,7 +202,9 @@ I don't really see a logical way to find what we are looking for. In CyberDefend
 
 ### Q9: The attacker downloaded SH scripts. What are the names of these files?
 
-**WIP**
+Using the same filter as the previous question we find shell scripts, fitting the patterns that are given.
+
+**Answer:** `0_cron.sh, 0_linux.sh, ap.sh`
 
 <br>
 

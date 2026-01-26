@@ -16,11 +16,10 @@
 title: Saad's blog
 email: saadbelarabi25@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Still figuring out what to put here.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: None
 github_username:  SaadBelarabi
+linkedin_username: saad-belarabi
 
 # Build settings
 markdown: kramdown
