@@ -1,0 +1,38 @@
+/* Image zoom styles */
+.zoomable-image {
+  cursor: zoom-in;
+  transition: opacity 0.2s;
+}
+
+.zoomable-image:hover {
+  opacity: 0.9;
+}
+
+.image-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  cursor: zoom-out;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-overlay.active {
+  display: flex;
+}
+
+.image-overlay img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.post-content img, article img {
+  border: 2px solid black;
+}
