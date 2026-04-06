@@ -10,12 +10,20 @@ categories: jekyll update
 
 
 
-
-# QRadar101 cyberdefenders lab write-up:
-
 Hello, this is a write-up for a digital forensics lab called "QRadar101". For those who don't know what this mean, we have a simulated environment with different resources (mentioned after the scenario), and a bunch of questions, that are supposed to sort of lead us to uncover what happened, if there's something more to what's mentioned in the scenario and try to recreate the timeline of events. It doesn't matter if you've never tried this kind of stuff yourself or ever heard of it. I tried to answer each question in a way that would be understandable for whoever has at least a basic knowledge in IT. Hope you have a good read and we'll meet at the end if this write-up!
 
+
+<div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 5px solid #ffc107;">
+<b> Tip/Note : </b> <br>
+- Every image is zoomable on-click, in case their content isn't visible enough. <br> 
+- There is a schema/draw at the start and at the end of the write-up that sums up the infrastructure of the firm we are investigating with the key events and traffic. I put it twice so it's easier to reach it depending on how far you are reading the write-up.
+</div>
+
+<br>
+
 ---
+
+<br>
 
 ## Scenario *(taken from the lab page itself)*:
 
@@ -23,7 +31,11 @@ Hello, this is a write-up for a digital forensics lab called "QRadar101". For th
 >
 > The initial analysis performed by the company's team showed that many systems were compromised. Also, alerts indicate the use of well known malicious tools in the network. As a SOC analyst, you are assigned to investigate the incident using QRadar SIEM and reconstruct the events carried out by the attacker.
 
+<br>
+
 ---
+
+<br>
 
 ## Dataset:
 
@@ -35,13 +47,14 @@ Hello, this is a write-up for a digital forensics lab called "QRadar101". For th
 
 ---
 
+![img](/images/qradar101/finalSchema.png)
+
+
 ## Q1: How many log sources available?
 
 You can check the available log sources in the "Admin" tab, under the Data sources/Events/Log Sources section.
 
 ![img](/images/qradar101/image001.png)
-
-*Fig 1: Catalog of log sources*
 
 As you can see a lot of informations are given, such as the name of log source, the log identifier which is either a name or an IP address, the type … It helps to have some context and make logs more understandable, instead of having random digits for each log source.
 
@@ -53,6 +66,8 @@ You can check the number of log sources at the very bottom of the window that sh
 
 ---
 
+<br>
+
 ## Q2: What is the IDS software used to monitor the network?
 
 From the list of log sources we found previously, only one is an IDS (Intrusion Detection System): suricata. An IDS is a rule-based engine that detects patterns (could be a combination of one/multiple of: IPs, ports, flow, payload). Whenever these patterns are matched, alerts are generated for the analyst so he can investigate and see whether this was an actual malicious behavior or just a false positive.
@@ -62,6 +77,8 @@ From the list of log sources we found previously, only one is an IDS (Intrusion 
 <br>
 
 ---
+
+<br>
 
 ## Q3: What is the domain name used in the network?
 
@@ -78,6 +95,8 @@ Account Name: HD-FIN-02$    Account Domain: HACKDEFEND
 <br>
 
 ---
+
+<br>
 
 ## Q4: Multiple IPs were communicating with the malicious server. One of them ends with "20". Provide the full IP.
 
@@ -97,11 +116,13 @@ Result:
 
 Looking at the results, we can clearly distinguish an IP ending with "20", as mentioned in the question. Another thing is: 1/ since it's the IP with the most Event Count (which means the most logs that have "192.168.20.20" as the destination IP and 2/ DC is one of the few log sources with no IP explicitly mentioned, we can take a strong guess that this IP is the DC (Domain Controller).
 
-**Answer: `192.168.20.20`**
+**Answer: `192[.]168[.]20[.]20` (after defanging)**
 
 <br>
 
 ---
+
+<br>
 
 ## Q5: What is the SID of the most frequent alert rule in the dataset?
 
@@ -118,7 +139,11 @@ Results:
 
 The triggered rule in question concerns the internal network IPs making DNS requests to .cloud toplevel domains. For the time being, this info doesn't get us much but we'll keep it in mind.
 
+<br>
+
 ---
+
+<br>
 
 ## Q6: What is the attacker's IP address?
 
@@ -127,13 +152,15 @@ Luckily without digging too much, we see one of the alerts from the previous res
 ![img](/images/qradar101/image006.png)
 
 
-The alert meaning is pretty straightforward, and we see that the source IP is 192[.]20.80.25 which is an external IP. 2 machines were targeted with this Trojan, 192.168.10.15 which is a machine in the Finance department and then 192.168.20.20 which we guessed would be the DC, respectively at: Nov 8, 2020, 7:39:54 PM and Nov 9, 2020, 7:00:49 AM. (timezone ???)
+The alert meaning is pretty straightforward, and we see that the source IP is 192[.]20.80.25 which is an external IP. 2 machines were targeted with this Trojan, 192.168.10.15 which is a machine in the Finance department and then 192.168.20.20 which we guessed would be the DC, respectively at: Nov 8, 2020, 7:39:54 PM and Nov 9, 2020, 7:00:49 AM. (couldn't find the timezone)
 
-**Answer: `192.20.80.25`** (is it enough to incriminate this IP ?)
+**Answer: `192[.]20[.]80.25`** (is it enough to incriminate this IP ?)
 
 <br>
 
 ---
+
+<br>
 
 ## Q7: The attacker was searching for data belonging to one of the company's projects, can you find the name of the project?
 
@@ -162,6 +189,8 @@ In two of the few logs we get, there's a powershell command (Get-ChildItem) that
 
 ---
 
+<br>
+
 ## Q8: What is the IP address of the first infected machine?
 
 Earlier on, we mentioned that a Trojan has been sent to two machines (HD-FIN-03 and the very likely DC). Since the first machine received the Trojan first and quite some abnormal behavior has been seen (who uses Get-ChildItem cmdlet in a supposedly finance machine??) we can say that this probably the first infected machine in the network.
@@ -171,6 +200,8 @@ Earlier on, we mentioned that a Trojan has been sent to two machines (HD-FIN-03 
 <br>
 
 ---
+
+<br>
 
 ## Q9: What is the username of the infected employee using 192.168.10.15?
 
@@ -196,6 +227,8 @@ As you can see a bunch of activity has been done under the user account named "n
 <br>
 
 ---
+
+<br>
 
 ## Q10: Hackers do not like logging, what logging was the attacker checking to see if enabled?
 
@@ -226,6 +259,8 @@ So the attacker was actually checking if powershell commands were logged.
 
 ---
 
+<br>
+
 ## Q11: Name of the second system the attacker targeted to cover up the employee?
 
 My thought process is the following: suppose a machine is targeted to cover up the suspect employee, some actions were performed on that machine to incriminate it and direct the intention to that machine. Now this machine either is accessed directly or through lateral movement from another infected machine. So far HD-FIN-03 is the only machine used by a worker we know is infected. So whatever we are looking for, it's not in that machine, nor in the DC.
@@ -251,6 +286,8 @@ I don't know if this is how the cover up was intended (and also to make the targ
 <br>
 
 ---
+
+<br>
 
 ## Q12: When was the first malicious connection to the domain controller (log start time - hh:mm:ss)?
 
@@ -278,7 +315,11 @@ The results that we got seemed to be almost on the same track of the response we
 
 After some research I found that it's pretty usual to have connections to the DC initiated by a notepad.exe on port 389 (LDAP) when opening file through a share. On the other side, I looked up if there was a share that was attempted to be accessed, but found none (EventID 5140). It could be because the logging for this kind of events is disabled (which could be not a good idea). Or there wasn't a share that was attempted to be accessed and there's some other shenanigans that were performed.
 
+<br>
+
 ---
+
+<br>
 
 ## Q13: What is the md5 hash of the malicious file?
 
@@ -307,6 +348,8 @@ There are two events here because one is for the actual content of the malware a
 
 ---
 
+<br>
+
 ## Q14: What is the MITRE persistence technique ID used by the attacker?
 
 In Q10 we searched up for indicators for registry access, and even though the results weren't interesting at that time, some stuff came up worth keeping in mind. We found:
@@ -324,6 +367,8 @@ The first finding is very likely attempt of persistence.
 
 ---
 
+<br>
+
 ## Q15: What protocol is used to perform host discovery?
 
 We have already found this earlier on (Q12) and the protocol that was mentioned in the logs was icmp.
@@ -336,6 +381,8 @@ We have already found this earlier on (Q12) and the protocol that was mentioned 
 <br>
 
 ---
+
+<br>
 
 ## Q16: What is the email service used by the company?(one word)
 
@@ -363,6 +410,8 @@ Results:
 
 ---
 
+<br>
+
 ## Q17: What is the name of the malicious file used for the initial infection?
 
 To look for newly created files, use EventID11 on the HD-FIN-03 machine.
@@ -385,6 +434,8 @@ We can see important_instructions.docx file being one of the early malicious fil
 
 ---
 
+<br>
+
 ## Q18: What is the name of the new account added by the attacker?
 
 Using EventID 4720 we can see there's only one account that have been created named rambo.
@@ -397,6 +448,8 @@ Using EventID 4720 we can see there's only one account that have been created na
 <br>
 
 ---
+
+<br>
 
 ## Q19: What is the PID of the process that performed injection?
 
@@ -413,6 +466,8 @@ We can see that the executable here injected something in notepad.exe, and this 
 
 ---
 
+<br>
+
 ## Q21: Attacker exfiltrated one file, what is the name of the tool used for exfiltration?
 
 Already answered in Q11, the file named sami.xlsx was exfiltrated using curl.
@@ -425,6 +480,8 @@ Already answered in Q11, the file named sami.xlsx was exfiltrated using curl.
 <br>
 
 ---
+
+<br>
 
 ## Q22: Who is the other legitimate domain admin other than the administrator?
 
@@ -441,6 +498,8 @@ Results:
 
 ---
 
+<br>
+
 ## Q23: The attacker used the host discovery technique to know how many hosts available in a certain network, what is the network the hacker scanned from the host IP 1 to 30?
 
 Same as we observed before, the attacker scanned the 192.168.20.0/24 subnet
@@ -451,8 +510,20 @@ Same as we observed before, the attacker scanned the 192.168.20.0/24 subnet
 
 ---
 
+<br>
+
 ## Q24: What is the name of the employee who hired the attacker?
 
 I don't get it, why would the attacker name the exfiltrated file with his own name lol
 
 **Answer: `sami`**
+
+![img](/images/qradar101/finalSchema.png)
+
+<br>
+
+---
+
+<br>
+
+That's it we've arrived at the very end of this write-up. It's been a good lab for me since I didn't use a lot of SIEM tools in investigations. I hope you've enjoyed this write-up and if you have any question regarding the lab or the write-up, any error I may have made, feel free to contact me: `saadbelarabi25@gmail.com`. I'll see you next time :)
